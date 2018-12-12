@@ -10,7 +10,7 @@ import {
   Dimensions,
   ViewPropTypes,
   Platform,
-  StyleSheet
+  StyleSheet,
 } from 'react-native';
 
 const styles = StyleSheet.create({
@@ -27,19 +27,21 @@ const defaultAnimation = {
   create: {
     duration: 300,
     type: LayoutAnimation.Types.easeInEaseOut,
-    property: LayoutAnimation.Properties.opacity
+    property: LayoutAnimation.Properties.opacity,
   },
   update: {
     type: LayoutAnimation.Types.spring,
-    springDamping: 200
-  }
+    springDamping: 200,
+  },
 };
 
 export default class KeyboardSpacer extends Component {
+
   static propTypes = {
     topSpacing: PropTypes.number,
     onToggle: PropTypes.func,
     style: ViewPropTypes.style,
+    animationConfig: PropTypes.any,
   };
 
   static defaultProps = {
@@ -51,7 +53,7 @@ export default class KeyboardSpacer extends Component {
     super(props, context);
     this.state = {
       keyboardSpace: 0,
-      isKeyboardOpened: false
+      isKeyboardOpened: false,
     };
     this._listeners = null;
     this.updateKeyboardSpace = this.updateKeyboardSpace.bind(this);
@@ -63,7 +65,7 @@ export default class KeyboardSpacer extends Component {
     const resetListener = Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide';
     this._listeners = [
       Keyboard.addListener(updateListener, this.updateKeyboardSpace),
-      Keyboard.addListener(resetListener, this.resetKeyboardSpace)
+      Keyboard.addListener(resetListener, this.resetKeyboardSpace),
     ];
   }
 
@@ -76,7 +78,7 @@ export default class KeyboardSpacer extends Component {
       return;
     }
 
-    let animationConfig = defaultAnimation;
+    let animationConfig = this.props.animationConfig || defaultAnimation;
     if (Platform.OS === 'ios') {
       animationConfig = LayoutAnimation.create(
         event.duration,
@@ -94,12 +96,12 @@ export default class KeyboardSpacer extends Component {
     const keyboardSpace = (screenHeight - event.endCoordinates.screenY) + this.props.topSpacing;
     this.setState({
       keyboardSpace,
-      isKeyboardOpened: true
+      isKeyboardOpened: true,
     }, this.props.onToggle(true, keyboardSpace));
   }
 
   resetKeyboardSpace(event) {
-    let animationConfig = defaultAnimation;
+    let animationConfig = this.props.animationConfig || defaultAnimation;
     if (Platform.OS === 'ios') {
       animationConfig = LayoutAnimation.create(
         event.duration,
@@ -111,7 +113,7 @@ export default class KeyboardSpacer extends Component {
 
     this.setState({
       keyboardSpace: 0,
-      isKeyboardOpened: false
+      isKeyboardOpened: false,
     }, this.props.onToggle(false, 0));
   }
 
@@ -119,4 +121,5 @@ export default class KeyboardSpacer extends Component {
     return (
       <View style={[styles.container, { height: this.state.keyboardSpace }, this.props.style]} />);
   }
+
 }
